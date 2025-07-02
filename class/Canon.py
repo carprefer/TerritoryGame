@@ -13,13 +13,15 @@ class Canon():
     def __init__(self, board, xIdx, yIdx, team, dir, range):
         (posX, posY) = board.idx_to_pos(xIdx, yIdx)
         self.images = [
-            pygame.image.load('../resources/images/canon_north_1(64).png').convert_alpha(),
-            pygame.image.load('../resources/images/canon_east_1(64).png').convert_alpha(),
-            pygame.image.load('../resources/images/canon_south_1(64).png').convert_alpha(),
-            pygame.image.load('../resources/images/canon_west_1(64).png').convert_alpha(),
+            pygame.image.load('../resources/images/canon_1(64).png').convert_alpha(),
+            pygame.image.load('../resources/images/canon_2(64).png').convert_alpha()
         ]
-        self.image = self.images[dir]
-        self.rect = self.image.get_rect(center = (posX, posY))
+        self.imageIdx = 0
+        self.images = [pygame.transform.rotate(i, -90*dir) for i in self.images]
+        self.rect = self.images[self.imageIdx].get_rect(center = (posX, posY))
+        self.font = pygame.font.SysFont(None, 24)
+
+        self.animationMode = False
 
         
         self.board = board
@@ -39,12 +41,24 @@ class Canon():
         ]
 
     def draw(self, window):
-        window.blit(self.image, self.rect)
+        if self.animationMode:
+            self.imageIdx += 0.1
+            if self.imageIdx >= self.range*2:
+                self.animationMode = False
+        else:
+            self.imageIdx = 0
+        window.blit(self.images[int(self.imageIdx) % len(self.images)], self.rect)
+
+        rangeText = self.font.render(str(self.range), True, 'yellow')
+        rangeRect = rangeText.get_rect(center = (self.rect.center[0]-15, self.rect.center[1]-15))
+        window.blit(rangeText, rangeRect)
+
+
         [a.draw(window) for a in self.arrows]
     
     def set_direction(self, dir):
         self.dir = dir
-        self.image = self.images[dir]
+        self.images = [pygame.transform.rotate(i, -90*dir) for i in self.images]
 
     def get_front_index(self, distance):
         if self.dir == NORTH:
@@ -62,12 +76,19 @@ class Canon():
         elif self.team == ENEMY:
             return - self.damage
 
-    def fire(self):
+    def fire(self, player, enemy):
+        self.animationMode = True
         for r in range(1, self.range + 1):
             targetX, targetY = self.get_front_index(r)
             if self.board.is_in_board(targetX, targetY) and self.board.cells[targetY][targetX].value * self.team < 0:
-                self.board.change_cell_value(targetX, targetY, self.damage_to_value())
-            
+                if targetX == player.xIdx and targetY == player.yIdx:
+                    player.hp -= 1
+                elif targetX == enemy.xIdx and targetY == enemy.yIdx:
+                    enemy.hp -= 1
+                else:
+                    self.board.change_cell_value(targetX, targetY, self.damage_to_value())
+
+
     def enable_arrow(self):
         for a in self.arrows:
             a.set_clickable(True)

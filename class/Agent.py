@@ -25,6 +25,7 @@ class Agent(ABC):
         self.optionNum = 0
         self.path = []
         self.remainDice = 0
+        self.curDice = 0
 
     def draw(self, window):
         window.blit(self.image, self.rect)
@@ -39,14 +40,31 @@ class Agent(ABC):
     def roll_the_dice(self):
         return choice(self.randomPool)
     
+    def occupy_here(self):
+        self.board.change_cell_value(self.xIdx, self.yIdx, self.damage_to_value())
+    
     def prepare_input(self, n, dice):
+        self.board.set_clickMode_all(True)
         self.optionNum = n
+        self.curDice = dice
         if self.optionNum == 0:
             self.prepare_move_input(dice)
         elif self.optionNum == 1:
             self.prepare_strengthen_input(dice)
         elif self.optionNum == 2:
             self.prepare_canon_input(dice)
+
+    def is_possible_option(self, n):
+        if n == 0:
+            for y in range(self.board.yNum):
+                for x in range(self.board.xNum):
+                    if ((abs(self.xIdx - x) == 1 and self.yIdx == y) or (self.xIdx == x and abs(self.yIdx - y) == 1)) and self.team * self.board.cells[y][x].value >= 0:
+                        return True
+            return False
+        elif n == 1:
+            return self.board.cells[self.yIdx][self.xIdx].value * self.team > 0
+        elif n == 2:
+            return self.board.canons[self.yIdx][self.xIdx] == None
 
     @abstractmethod
     def prepare_move_input(self, dice):
@@ -67,6 +85,10 @@ class Agent(ABC):
             self.receive_strengthen_input()
         elif self.optionNum == 2:
             self.receive_canon_input()
+
+        if self.is_input_end():
+            self.board.set_clickMode_all(False)
+            self.board.set_unclickable_all()
 
     @abstractmethod
     def receive_move_input(self):
@@ -95,10 +117,12 @@ class Agent(ABC):
             return - self.damage
 
     def action(self):
+        self.diceSum += self.curDice
         if self.optionNum == 0:
             for (x,y) in self.path:
                 self.board.change_cell_value(x, y, self.damage_to_value())
-            self.move_in_board(x,y)
+            if len(self.path) > 0:
+                self.move_in_board(x,y)
         elif self.optionNum == 1:
             for (x,y) in self.path:
                 self.board.change_cell_value(x, y, self.damage_to_value())

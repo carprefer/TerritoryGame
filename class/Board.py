@@ -37,6 +37,18 @@ class Board():
                 if canon != None:
                     canon.draw(window)
 
+    def count_cells(self):
+        playerCount = 0
+        enemyCount = 0
+        for yIdx in range(self.yNum):
+            for xIdx in range(self.xNum):
+                v = self.cells[yIdx][xIdx].value
+                if v > 0:
+                    playerCount += 1
+                elif v < 0:
+                    enemyCount += 1
+
+        return playerCount, enemyCount
 
     def idx_to_pos(self, xIdx, yIdx):
         x = self.posX + (BOARD_SIZE - CELL_SIZE * self.xNum - CELL_GAP * (self.xNum-1))//2 + (CELL_SIZE+CELL_GAP) * xIdx + CELL_SIZE//2
@@ -62,12 +74,12 @@ class Board():
         del canon
         self.canons[yIdx][xIdx] = None
 
-    def fire_all_canon(self):
+    def fire_all_canon(self, player, enemy):
         for yIdx in range(self.yNum):
             for xIdx in range(self.xNum):
                 canon = self.canons[yIdx][xIdx]
                 if canon != None:
-                    canon.fire()
+                    canon.fire(player, enemy)
 
     def get_clicked_cell_idx(self):
         for yIdx in range(self.yNum):
@@ -76,10 +88,10 @@ class Board():
                     return (xIdx, yIdx)
         return None
                 
-    def set_clickable_cross(self, xIdx, yIdx):
+    def set_clickable_cross(self, xIdx, yIdx, team):
         for y in range(self.yNum):
             for x in range(self.xNum):
-                if (abs(xIdx - x) == 1 and yIdx == y) or (xIdx == x and abs(yIdx - y) == 1):
+                if ((abs(xIdx - x) == 1 and yIdx == y) or (xIdx == x and abs(yIdx - y) == 1)) and team * self.cells[y][x].value >= 0:
                     self.cells[y][x].set_clickable(True)
                 else:
                     self.cells[y][x].set_clickable(False)
@@ -89,13 +101,13 @@ class Board():
         def dfs(xIdx, yIdx):
             visited[yIdx][xIdx] = True
             curV = self.cells[yIdx][xIdx].value
-            if not visited[yIdx+1][xIdx] and self.cells[yIdx+1][xIdx].value * curV > 0:
+            if self.is_in_board(xIdx, yIdx+1) and not visited[yIdx+1][xIdx] and self.cells[yIdx+1][xIdx].value * curV > 0:
                 dfs(xIdx, yIdx+1)
-            if not visited[yIdx-1][xIdx] and self.cells[yIdx-1][xIdx].value * curV > 0:
+            if self.is_in_board(xIdx, yIdx-1) and not visited[yIdx-1][xIdx] and self.cells[yIdx-1][xIdx].value * curV > 0:
                 dfs(xIdx, yIdx-1)
-            if not visited[yIdx][xIdx+1] and self.cells[yIdx][xIdx+1].value * curV > 0:
+            if self.is_in_board(xIdx+1, yIdx) and not visited[yIdx][xIdx+1] and self.cells[yIdx][xIdx+1].value * curV > 0:
                 dfs(xIdx+1, yIdx)
-            if not visited[yIdx][xIdx-1] and self.cells[yIdx][xIdx-1].value * curV > 0:
+            if self.is_in_board(xIdx-1, yIdx) and not visited[yIdx][xIdx-1] and self.cells[yIdx][xIdx-1].value * curV > 0:
                 dfs(xIdx-1, yIdx)
 
         dfs(xIdx, yIdx)
@@ -106,6 +118,20 @@ class Board():
                     self.cells[y][x].set_clickable(True)
                 else:
                     self.cells[y][x].set_clickable(False)
+
+    def get_clickable_cells(self):
+        return [(x,y) for y in range(self.yNum) for x in range(self.xNum) if self.cells[y][x].clickable]
+    
+    def set_clickMode_all(self, clickMode):
+        for y in range(self.yNum):
+            for x in range(self.xNum):
+                self.cells[y][x].clickMode = clickMode
+    
+    def set_unclickable_all(self):
+        for y in range(self.yNum):
+            for x in range(self.xNum):
+                self.cells[y][x].set_clickable(False)
+
         
         
 

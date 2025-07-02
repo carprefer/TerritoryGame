@@ -20,11 +20,21 @@ class Cell():
         self.value = 0      # 0: neutral / +: player / -: enemy
 
         self.clickable = False
+        self.clickMode = False
+        self.selected = False
 
 
     def draw(self, window):
+        if self.clickMode:
+            if self.clickable:
+                self.image.set_alpha(255)
+            else:
+                self.image.set_alpha(128)
+        else:
+            self.image.set_alpha(255)
+
         window.blit(self.image, self.rect)
-        valueText = self.font.render(str(self.value), True, 'black')
+        valueText = self.font.render(str(abs(self.value)), True, 'black')
         window.blit(valueText, self.rect.move(48, 48))
 
     def change_value(self, diff):
@@ -53,6 +63,7 @@ class Cell():
             if self.rect.collidepoint(mousePos):
                 x = mousePos[0] - self.rect.x
                 y = mousePos[1] - self.rect.y
+                self.selected = True
                 return self.mask.get_at((x,y))
             else:
                 return False

@@ -33,11 +33,14 @@ class Option():
             window.blit(descriptionText, descriptionRect)
 
     def is_clicked(self):
-        mousePos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(mousePos):
-            x = mousePos[0] - self.rect.x
-            y = mousePos[1] - self.rect.y
-            return self.mask.get_at((x,y))
+        if self.visible:
+            mousePos = pygame.mouse.get_pos()
+            if self.rect.collidepoint(mousePos):
+                x = mousePos[0] - self.rect.x
+                y = mousePos[1] - self.rect.y
+                return self.mask.get_at((x,y))
+            else:
+                return False
         else:
             return False
 
