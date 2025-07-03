@@ -1,0 +1,43 @@
+# direction
+NORTH = 0
+EAST = 1
+SOUTH = 2
+WEST = 3
+
+# cell type
+NEUTRAL = 0
+PLAYER = 1
+ENEMY = 2
+
+# board frame
+CELL_GAP = 4
+BOARD_SIZE = 704
+CELL_SIZE = 64
+
+# team
+PLAYER = 1
+ENEMY = -1
+
+# option
+MOVE = 0
+STRENGTHEN = 1
+CANON = 2
+
+# window frame
+WINDOW_WIDTH = 1600
+WINDOW_HEIGHT = 900
+BOARD_SIZE = 704
+STATUS_SIZE = 384
+OPTION_Y = 450
+
+STATUS_X_GAP = ((WINDOW_WIDTH - BOARD_SIZE)//2 - STATUS_SIZE)//2
+
+# game info
+MAX_ROUND = 30
+
+# state
+START_STATE = 0
+OPTION_STATE = 1
+INPUT_STATE = 2
+OUTPUT_STATE = 3
+FIRE_STATE = 4

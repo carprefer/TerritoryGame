@@ -1,10 +1,8 @@
 import pygame
+from utils import *
 from Cell import Cell
 from Canon import Canon
 
-CELL_GAP = 4
-BOARD_SIZE = 704
-CELL_SIZE = 64
 
 class Board():
     def __init__(self, xNum, yNum, posX, posY):
@@ -27,15 +25,8 @@ class Board():
 
     def draw(self, window):
         window.blit(self.image, self.rect)
-        for yIdx in range(self.yNum):
-            for xIdx in range(self.xNum):
-                self.cells[yIdx][xIdx].draw(window)
-        
-        for yIdx in range(self.yNum):
-            for xIdx in range(self.xNum):
-                canon = self.canons[yIdx][xIdx]
-                if canon != None:
-                    canon.draw(window)
+        [self.cells[y][x].draw(window) for y in range(self.yNum) for x in range(self.xNum)]
+        [self.canons[y][x].draw(window) for y in range(self.yNum) for x in range(self.xNum) if self.canons[y][x] != None]
 
     def count_cells(self):
         playerCount = 0
@@ -57,17 +48,20 @@ class Board():
         return x, y
     
     def is_in_board(self, xIdx, yIdx):
-        return xIdx < self.xNum and yIdx < self.yNum
+        return 0 <= xIdx and xIdx < self.xNum and 0 <= yIdx and yIdx < self.yNum
     
     def change_cell_value(self, xIdx, yIdx, diff):
         if self.is_in_board(xIdx, yIdx):
-            if self.cells[yIdx][xIdx].change_value(diff):
+            self.cells[yIdx][xIdx].change_value(diff)
+            if self.cells[yIdx][xIdx].value == 0:
                 self.delete_canon(xIdx, yIdx)
     
     def add_canon(self, xIdx, yIdx, team, dir, range):
+        if self.canons[yIdx][xIdx] != None:
+            print('canon error')
         canon = Canon(self, xIdx, yIdx, team, dir, range)
         self.canons[yIdx][xIdx] = canon
-        canon.enable_arrow()
+        canon.enable_arrow(True)
 
     def delete_canon(self, xIdx, yIdx):
         canon = self.canons[yIdx][xIdx]
@@ -75,11 +69,7 @@ class Board():
         self.canons[yIdx][xIdx] = None
 
     def fire_all_canon(self, player, enemy):
-        for yIdx in range(self.yNum):
-            for xIdx in range(self.xNum):
-                canon = self.canons[yIdx][xIdx]
-                if canon != None:
-                    canon.fire(player, enemy)
+        [self.canons[y][x].fire(player,enemy) for y in range(self.yNum) for x in range(self.xNum) if self.canons[y][x] != None]
 
     def get_clicked_cell_idx(self):
         for yIdx in range(self.yNum):
@@ -112,12 +102,10 @@ class Board():
 
         dfs(xIdx, yIdx)
 
-        for y in range(self.yNum):
-            for x in range(self.xNum):
-                if visited[y][x]:
-                    self.cells[y][x].set_clickable(True)
-                else:
-                    self.cells[y][x].set_clickable(False)
+        [self.cells[y][x].set_clickable(visited[y][x]) for y in range(self.yNum) for x in range(self.xNum)]
+
+    def set_clickable_all(self, clickable):
+        [self.cells[y][x].set_clickable(clickable) for y in range(self.yNum) for x in range(self.xNum)]
 
     def get_clickable_cells(self):
         return [(x,y) for y in range(self.yNum) for x in range(self.xNum) if self.cells[y][x].clickable]
@@ -127,10 +115,7 @@ class Board():
             for x in range(self.xNum):
                 self.cells[y][x].clickMode = clickMode
     
-    def set_unclickable_all(self):
-        for y in range(self.yNum):
-            for x in range(self.xNum):
-                self.cells[y][x].set_clickable(False)
+    
 
         
         

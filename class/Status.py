@@ -1,9 +1,5 @@
 import pygame
 
-WINDOW_WIDTH = 1600
-WINDOW_HEIGHT = 900
-BOARD_SIZE = 704
-
 class Status():
     def __init__(self, posX, posY, agent, name):
         self.images = [
@@ -30,7 +26,7 @@ class Status():
         hpRect = hpText.get_rect(topleft = (self.rect.topleft[0] + 20, self.rect.topleft[1]+160))
         window.blit(hpText, hpRect)
 
-        diceText = self.statFont.render("Total Dice: " + str(self.agent.diceSum), True, 'white')
+        diceText = self.statFont.render("Territory: " + str(self.agent.territory), True, 'white')
         diceRect = diceText.get_rect(topleft = (self.rect.topleft[0] + 20, self.rect.topleft[1]+220))
         window.blit(diceText, diceRect)
 

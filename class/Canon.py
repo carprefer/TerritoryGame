@@ -1,13 +1,7 @@
 import pygame
+from utils import *
 from Arrow import Arrow
 
-NORTH = 0
-EAST = 1
-SOUTH = 2
-WEST = 3
-
-PLAYER = 1
-ENEMY = -1
 
 class Canon():
     def __init__(self, board, xIdx, yIdx, team, dir, range):
@@ -22,6 +16,7 @@ class Canon():
         self.font = pygame.font.SysFont(None, 24)
 
         self.animationMode = False
+        self.visible = True
 
         
         self.board = board
@@ -34,27 +29,30 @@ class Canon():
 
         
         self.arrows = [
-            Arrow(posX, posY - 28, 0),
-            Arrow(posX + 28, posY, 1),
-            Arrow(posX, posY + 28, 2),
-            Arrow(posX - 28, posY, 3),
+            Arrow(posX, posY - 28, NORTH),
+            Arrow(posX + 28, posY, EAST),
+            Arrow(posX, posY + 28, SOUTH),
+            Arrow(posX - 28, posY, WEST),
         ]
 
     def draw(self, window):
-        if self.animationMode:
-            self.imageIdx += 0.1
-            if self.imageIdx >= self.range*2:
-                self.animationMode = False
-        else:
-            self.imageIdx = 0
-        window.blit(self.images[int(self.imageIdx) % len(self.images)], self.rect)
+        if self.visible:
+            if self.animationMode:
+                self.imageIdx += 0.1
+                if self.imageIdx >= self.range*2:
+                    self.animationMode = False
+            else:
+                self.imageIdx = 0
+            window.blit(self.images[int(self.imageIdx) % len(self.images)], self.rect)
 
-        rangeText = self.font.render(str(self.range), True, 'yellow')
-        rangeRect = rangeText.get_rect(center = (self.rect.center[0]-15, self.rect.center[1]-15))
-        window.blit(rangeText, rangeRect)
+            rangeText = self.font.render(str(self.range), True, 'yellow')
+            rangeRect = rangeText.get_rect(center = (self.rect.center[0]-15, self.rect.center[1]-15))
+            window.blit(rangeText, rangeRect)
 
+            [a.draw(window) for a in self.arrows]
 
-        [a.draw(window) for a in self.arrows]
+    def set_visible(self, visible):
+        self.visible = visible
     
     def set_direction(self, dir):
         self.dir = dir
@@ -70,12 +68,6 @@ class Canon():
         elif self.dir == WEST:
             return self.xIdx - distance, self.yIdx
         
-    def damage_to_value(self):
-        if self.team == PLAYER:
-            return self.damage
-        elif self.team == ENEMY:
-            return - self.damage
-
     def fire(self, player, enemy):
         self.animationMode = True
         for r in range(1, self.range + 1):
@@ -86,16 +78,12 @@ class Canon():
                 elif targetX == enemy.xIdx and targetY == enemy.yIdx:
                     enemy.hp -= 1
                 else:
-                    self.board.change_cell_value(targetX, targetY, self.damage_to_value())
+                    self.board.change_cell_value(targetX, targetY, self.damage * self.team)
 
 
-    def enable_arrow(self):
-        for a in self.arrows:
-            a.set_clickable(True)
-
-    def unable_arrow(self):
-        for a in self.arrows:
-            a.set_clickable(False)
+    def enable_arrow(self, enable):
+        [a.set_clickable(enable) for a in self.arrows]
+        [a.set_visible(enable) for a in self.arrows]
 
     def get_clicked_arrow_dir(self):
         for i, a in enumerate(self.arrows):

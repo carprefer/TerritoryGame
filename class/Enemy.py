@@ -1,75 +1,104 @@
 import pygame
+from utils import *
 from random import choice
 from Agent import Agent
 
-PLAYER = 1
-ENEMY = -1
-
 class Enemy(Agent):
     def __init__(self, board, xIdx, yIdx):
-        super().__init__(board)
-        self.images = [
+        images = [
             pygame.image.load('../resources/images/enemy_1(32).png').convert_alpha()
         ]
-        self.image = self.images[0]
-        self.rect = self.image.get_rect()
+        super().__init__(board, images, xIdx, yIdx)
         
         self.team = ENEMY
 
-     
-        self.move_in_board(xIdx, yIdx)
-
     def generate_input(self, dices):
         if sum(dices) > 0:
-            priority = [5, 1, 4]
-            pool = []
-            for i, d in enumerate(dices):
-                if d != 0:
-                    pool += [(i,d)] * d * priority[i]
+            movePathCandidates = self.exhaustive_search(self.xIdx, self.yIdx, [], dices[0])
+            movePathScores = [self.calculate_path_score(c) for c in movePathCandidates]
+            canonScores = self.calculate_canon_score(dices[2])
+            if max(movePathScores) > max(canonScores):
+                maxIdxs = [i for i, s in enumerate(movePathScores) if s == max(movePathScores)]
+                choosenIdx = choice(maxIdxs)
+                self.path = movePathCandidates[choosenIdx]
+                self.remainDice = 0
+                self.option = 0
+            else:
+                maxIdxs = [i for i, s in enumerate(canonScores) if s == max(canonScores)]
+                self.board.add_canon(self.xIdx, self.yIdx, self.team, 0, dices[2])
+                canon = self.board.canons[self.yIdx][self.xIdx]
+                canon.visible = False
+                arrowDir = choice(maxIdxs)
+                if arrowDir != None:
+                    canon.set_direction(arrowDir)
+                    self.remainDice = 0
+                    canon.enable_arrow(False)
+                self.option = 2
 
-            i, d = choice(pool)
-            self.prepare_input(i, d)
-            while not self.is_input_end():
-                self.receive_input()
 
-    def prepare_move_input(self, dice):
-        self.remainDice = dice
-        self.path = []
-        self.board.set_clickable_cross(self.xIdx, self.yIdx, self.team)
+    def exhaustive_search(self, xIdx, yIdx, selected, dice):
+        if len(selected) == dice:
+            return [selected]
+        result = []
+        self.board.set_clickable_cross(xIdx, yIdx, self.team)
+        clickableCells = self.board.get_clickable_cells()
+        for (x,y) in clickableCells:
+            result += self.exhaustive_search(x, y, selected + [(x,y)], dice)
+        return result
 
-    def prepare_strengthen_input(self, dice):
-        self.remainDice = dice
-        self.path = []
-        self.board.set_clickable_connected(self.xIdx, self.yIdx)
+    def calculate_path_score(self, path):
+        score = 0
+        for (x,y) in path:
+            if self.board.cells[y][x].value == 0:
+                score += 2
+            else:
+                score += 1
+        return score
+    
+    def calculate_canon_score(self, dice):
+        pool = [0,0,0,0]
+        for r in range(1, dice + 1):
+            targetX = self.xIdx
+            targetY = self.yIdx - r
+            if self.board.is_in_board(targetX, targetY):
+                if self.board.cells[targetY][targetX].value * self.team < 0:
+                    pool[0] += 3
+                    if self.board.canons[targetY][targetX] != None:
+                        pool[0] += 3
+                else:
+                    pool[0] += 1
+            targetX = self.xIdx + r
+            targetY = self.yIdx
+            if self.board.is_in_board(targetX, targetY):
+                if self.board.cells[targetY][targetX].value * self.team < 0:
+                    pool[1] += 3
+                    if self.board.canons[targetY][targetX] != None:
+                        pool[1] += 3
+                else:
+                    pool[1] += 1
+            targetX = self.xIdx
+            targetY = self.yIdx + r
+            if self.board.is_in_board(targetX, targetY):
+                if self.board.cells[targetY][targetX].value * self.team < 0:
+                    pool[2] += 3
+                    if self.board.canons[targetY][targetX] != None:
+                        pool[2] += 3
+                else:
+                    pool[2] += 1
+            targetX = self.xIdx - r
+            targetY = self.yIdx
+            if self.board.is_in_board(targetX, targetY):
+                if self.board.cells[targetY][targetX].value * self.team < 0:
+                    pool[3] += 3
+                    if self.board.canons[targetY][targetX] != None:
+                        pool[3] += 3
+                else:
+                    pool[3] += 1
 
-    def prepare_canon_input(self, dice):
-        self.board.add_canon(self.xIdx, self.yIdx, self.team, 0, dice)
-        self.remainDice = dice
+        return pool
 
-    def receive_move_input(self):
-        priority = [5, 1]
-        pool = []
-        for (x,y) in self.board.get_clickable_cells():
-            pool += [(x,y)] * priority[abs(self.board.cells[y][x].value) > 0]
-        cellIdx = choice(pool)
-        if cellIdx != None and self.remainDice > 0:
-            self.path.append((cellIdx[0], cellIdx[1]))
-            self.board.set_clickable_cross(cellIdx[0], cellIdx[1], self.team)
-            self.remainDice -= 1
 
-    def receive_strengthen_input(self):
-        cellIdx = choice(self.board.get_clickable_cells())
-        if cellIdx != None and self.remainDice > 0:
-            self.path.append((cellIdx[0], cellIdx[1]))
-            self.remainDice -= 1
 
-    def receive_canon_input(self):
-        canon = self.board.canons[self.yIdx][self.xIdx]
-        arrowDir = choice([0,1,2,3])
-        if arrowDir != None:
-            canon.set_direction(arrowDir)
-            self.remainDice = 0
-            canon.unable_arrow()
                 
 
 
