@@ -3,7 +3,7 @@ import pygame
 class Status():
     def __init__(self, posX, posY, agent, name):
         self.images = [
-            pygame.image.load('../resources/images/status_1(384).png').convert_alpha(),
+            pygame.image.load('../resources/images/in_game/status_1(384).png').convert_alpha(),
         ]
         self.image = self.images[0]
         self.rect = self.image.get_rect(topleft = (posX, posY))

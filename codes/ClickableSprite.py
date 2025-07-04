@@ -33,6 +33,10 @@ class ClickableSprite():
     def set_visible(self, visible):
         self.visible = visible
 
+    def set_enable(self, enable):
+        self.clickable = enable
+        self.visible = enable
+
             
 
 

@@ -6,7 +6,7 @@ from Agent import Agent
 class Enemy(Agent):
     def __init__(self, board, xIdx, yIdx):
         images = [
-            pygame.image.load('../resources/images/enemy_1(32).png').convert_alpha()
+            pygame.image.load('../resources/images/in_game/enemy_1(32).png').convert_alpha()
         ]
         super().__init__(board, images, xIdx, yIdx)
         

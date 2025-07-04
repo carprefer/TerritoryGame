@@ -16,7 +16,7 @@ class Agent():
         self.yIdx = 0
         
         self.territory = 0
-        self.hp = 5
+        self.hp = 10
         self.damage = 1
         self.randomPool = [1,2,3,4,5,6]
         self.option = 0

@@ -5,7 +5,7 @@ from Agent import Agent
 class Player(Agent):
     def __init__(self, board, xIdx, yIdx):
         images = [
-            pygame.image.load('../resources/images/player_1(32).png').convert_alpha()
+            pygame.image.load('../resources/images/in_game/player_1(32).png').convert_alpha()
         ]
         super().__init__(board, images, xIdx, yIdx)
         

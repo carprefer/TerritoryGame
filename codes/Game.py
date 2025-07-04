@@ -11,8 +11,9 @@ from Status import Status
 
 
 class Game:
-    def __init__(self, args):
+    def __init__(self, args, window):
         self.args = args
+        self.window = window
         self.clock = pygame.time.Clock()
 
         self.state = START_STATE
@@ -21,8 +22,8 @@ class Game:
         self.background = Background(WINDOW_WIDTH//2, WINDOW_HEIGHT//2)
         self.board = Board(self.args['b_xNum'], self.args['b_yNum'], (WINDOW_WIDTH - BOARD_SIZE)//2, (WINDOW_HEIGHT - BOARD_SIZE)//2)
 
-        self.player = Player(self.board, 1, 8)
-        self.enemy = Enemy(self.board, 8, 1)
+        self.player = Player(self.board, 1, args['b_yNum'] - 2)
+        self.enemy = Enemy(self.board, args['b_xNum'] - 2, 1)
         
         self.player.occupy_here()
         self.enemy.occupy_here()
@@ -42,8 +43,11 @@ class Game:
         self.playerStatus = Status(STATUS_X_GAP, 0, self.player, 'player')
         self.enemyStatus = Status((WINDOW_WIDTH + BOARD_SIZE)//2 + STATUS_X_GAP, 0, self.enemy, 'enemy')
 
+        self.roundFont = pygame.font.SysFont(None, 48)
+
+
     def is_game_end(self):
-        return self.player.hp <= 0 or self.enemy.hp <= 0 or self.round >= MAX_ROUND
+        return self.player.hp <= 0 or self.enemy.hp <= 0 or self.round >= self.args['max_round']
     
     def show_ending(self):
         playerCellCount, enemyCellCount = self.board.count_cells()
@@ -58,9 +62,6 @@ class Game:
                 print('enemy win!')
             else:
                 print('draw')
-
-        pygame.quit()
-        exit()
         
 
     def run(self):
@@ -135,14 +136,18 @@ class Game:
             self.clock.tick(self.args['fps'])
 
     def draw_all(self):
-        self.background.draw(window, self.round)
-        self.board.draw(window)
-        self.player.draw(window)
-        self.enemy.draw(window)
-        [o.draw(window) for o in self.playerOptions]
-        [o.draw(window) for o in self.enemyOptions]
-        self.playerStatus.draw(window)
-        self.enemyStatus.draw(window)
+        self.background.draw(self.window)
+        self.board.draw(self.window)
+        self.player.draw(self.window)
+        self.enemy.draw(self.window)
+        [o.draw(self.window) for o in self.playerOptions]
+        [o.draw(self.window) for o in self.enemyOptions]
+        self.playerStatus.draw(self.window)
+        self.enemyStatus.draw(self.window)
+
+        roundText = self.roundFont.render(str(self.round) + " Round", True, 'white')
+        roundRect = roundText.get_rect(center = (WINDOW_WIDTH//2, 50))
+        self.window.blit(roundText, roundRect)
 
 
 
@@ -155,6 +160,6 @@ if __name__ == "__main__":
     }
     pygame.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    game = Game(args)
+    game = Game(args, window)
     game.run()
 

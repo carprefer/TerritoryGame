@@ -7,8 +7,8 @@ class Canon():
     def __init__(self, board, xIdx, yIdx, team, dir, range):
         (posX, posY) = board.idx_to_pos(xIdx, yIdx)
         self.images = [
-            pygame.image.load('../resources/images/canon_1(64).png').convert_alpha(),
-            pygame.image.load('../resources/images/canon_2(64).png').convert_alpha()
+            pygame.image.load('../resources/images/in_game/canon_1(64).png').convert_alpha(),
+            pygame.image.load('../resources/images/in_game/canon_2(64).png').convert_alpha()
         ]
         self.imageIdx = 0
         self.images = [pygame.transform.rotate(i, -90*dir) for i in self.images]
@@ -72,13 +72,21 @@ class Canon():
         self.animationMode = True
         for r in range(1, self.range + 1):
             targetX, targetY = self.get_front_index(r)
-            if self.board.is_in_board(targetX, targetY) and self.board.cells[targetY][targetX].value * self.team < 0:
+            #if self.board.is_in_board(targetX, targetY) and self.board.cells[targetY][targetX].value * self.team < 0:
+            if self.board.is_in_board(targetX, targetY):
                 if targetX == player.xIdx and targetY == player.yIdx:
                     player.hp -= 1
                 elif targetX == enemy.xIdx and targetY == enemy.yIdx:
                     enemy.hp -= 1
                 else:
-                    self.board.change_cell_value(targetX, targetY, self.damage * self.team)
+                    v = self.board.cells[targetY][targetX].value
+                    if v > 0:
+                        f = -1
+                    elif v < 0:
+                        f = 1
+                    else:
+                        f = 0
+                    self.board.change_cell_value(targetX, targetY, self.damage * f)
 
 
     def enable_arrow(self, enable):

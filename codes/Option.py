@@ -4,7 +4,7 @@ from ClickableSprite import ClickableSprite
 class Option(ClickableSprite):
     def __init__(self, posX, posY, description):
         images = [
-            pygame.image.load('../resources/images/option_1(160).png').convert_alpha(),
+            pygame.image.load('../resources/images/in_game/option_1(160).png').convert_alpha(),
         ]
         super().__init__(posX, posY, images)
 

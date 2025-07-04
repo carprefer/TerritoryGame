@@ -6,9 +6,9 @@ from ClickableSprite import ClickableSprite
 class Cell(ClickableSprite):
     def __init__(self, posX, posY):
         images = [
-            pygame.image.load('../resources/images/cell_1(64).png').convert_alpha(),
-            pygame.image.load('../resources/images/cell_2(64).png').convert_alpha(),
-            pygame.image.load('../resources/images/cell_3(64).png').convert_alpha(),
+            pygame.image.load('../resources/images/in_game/cell_1(64).png').convert_alpha(),
+            pygame.image.load('../resources/images/in_game/cell_2(64).png').convert_alpha(),
+            pygame.image.load('../resources/images/in_game/cell_3(64).png').convert_alpha(),
         ]
         super().__init__(posX, posY, images)
 

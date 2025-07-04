@@ -12,10 +12,11 @@ class Board():
         self.posY = posY
 
         self.images = [
-            pygame.image.load('../resources/images/board_1(704).png').convert_alpha()
+            pygame.image.load('../resources/images/in_game/board_1(704).png').convert_alpha()
         ]
 
         self.image = self.images[0]
+
         self.rect = self.image.get_rect(topleft = (posX, posY))
 
         self.cells = [[Cell(*self.idx_to_pos(xIdx, yIdx)) for xIdx in range(xNum)] for yIdx in range(yNum)]
