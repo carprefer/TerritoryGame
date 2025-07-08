@@ -1,3 +1,5 @@
+import pygame
+
 # direction
 NORTH = 0
 EAST = 1
@@ -42,6 +44,31 @@ FIRE_STATE = 4
 
 
 # UI info
+BACKGROUND_COLOR = '#202400'
 SLIDER_WIDTH = 300
 SLIDER_HEIGHT = 10
 HANDLE_SIZE = 10
+PICK_WIDTH = 600
+PICK_HEIGHT = 600
+UI_GAP = 50
+
+
+def render_text(window, text, font, color, rect, lineGap=5):
+    words = text.split(' ')
+    lines = []
+    curLine = ''
+    
+    for word in words:
+        tmpLine = curLine + word + ' '
+        if font.size(tmpLine)[0] <= rect.width:
+            curLine = tmpLine
+        else:
+            lines.append(curLine.strip())
+            curLine = word + ' '
+    lines.append(curLine.strip())
+    
+    y = rect.top
+    for line in lines:
+        text = font.render(line, True, color)
+        window.blit(text, (rect.left, y))
+        y += text.get_height() + lineGap

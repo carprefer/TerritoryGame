@@ -3,14 +3,16 @@ from utils import *
 from random import choice
 from Agent import Agent
 
-class Enemy(Agent):
-    def __init__(self, board, xIdx, yIdx):
+class Enemy1(Agent):
+    def __init__(self, board, scale=1):
         images = [
             pygame.image.load('../resources/images/in_game/enemy_1(32).png').convert_alpha()
         ]
-        super().__init__(board, images, xIdx, yIdx)
+        super().__init__(board, images, scale)
         
         self.team = ENEMY
+        self.name = 'Easy'
+        self.feature = 'Basic mode.'
 
     def generate_input(self, dices):
         if sum(dices) > 0:
@@ -99,7 +101,9 @@ class Enemy(Agent):
 
 
 
-                
+Enemy = [
+    Enemy1,
+]
 
 
 

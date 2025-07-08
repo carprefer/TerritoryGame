@@ -11,7 +11,7 @@ from Status import Status
 
 
 class Game:
-    def __init__(self, args, window):
+    def __init__(self, args, window, playerIdx, enemyIdx):
         self.args = args
         self.window = window
         self.clock = pygame.time.Clock()
@@ -22,8 +22,11 @@ class Game:
         self.background = Background(WINDOW_WIDTH//2, WINDOW_HEIGHT//2)
         self.board = Board(self.args['b_xNum'], self.args['b_yNum'], (WINDOW_WIDTH - BOARD_SIZE)//2, (WINDOW_HEIGHT - BOARD_SIZE)//2)
 
-        self.player = Player(self.board, 1, args['b_yNum'] - 2)
-        self.enemy = Enemy(self.board, args['b_xNum'] - 2, 1)
+        self.player = Player[playerIdx](self.board)
+        self.enemy = Enemy[enemyIdx](self.board)
+
+        self.player.move_in_board(1, args['b_yNum'] - 2)
+        self.enemy.move_in_board(args['b_xNum'] - 2, 1)
         
         self.player.occupy_here()
         self.enemy.occupy_here()

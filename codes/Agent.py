@@ -1,14 +1,17 @@
+import pygame
 from utils import *
 from random import choice
 
 
 class Agent():
-    def __init__(self, board, images, xIdx, yIdx):
-        self.images = images
+    def __init__(self, board, images, scale=1):
+        self.images = [pygame.transform.scale(i, (i.get_width()*scale, i.get_height()*scale)) for i in images]
         self.image = self.images[0]
         self.rect = self.image.get_rect()
 
         self.team = None
+        self.name = 'N/A'
+        self.feature = 'N/A'
 
         self.board = board
 
@@ -23,8 +26,6 @@ class Agent():
         self.path = []
         self.remainDice = 0
 
-        self.move_in_board(xIdx, yIdx)
-
 
     def draw(self, window):
         window.blit(self.image, self.rect)
@@ -34,6 +35,9 @@ class Agent():
         self.yIdx = yIdx
         posX, posY = self.board.idx_to_pos(xIdx, yIdx)
 
+        self.rect.center = (posX, posY)
+
+    def move_outside_board(self, posX, posY):
         self.rect.center = (posX, posY)
     
     def roll_the_dice(self):
